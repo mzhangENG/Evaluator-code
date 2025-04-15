@@ -603,6 +603,9 @@ class Hands:
         debug_image[y1:y2, x1:x2] = processed_hand
 
     def logging_csv(number, mode, landmark_list, handedness, frame_num):
+
+        # old function
+        '''
         if mode == 0:
             pass
         if mode == 1 and (0 <= number <= 9):
@@ -612,6 +615,29 @@ class Hands:
                     writer = csv.writer(f)
                     writer.writerow([number, *landmark_list])
                     print("Logged data on frame " + str(frame_num))
+        
+        '''
+        
+        #number/label is hardcoded for each posture (1 for supination, 2 for pronation)
+        number = 2
+        csv_path = 'keypoint_test.csv'
+
+        if mode == 1:
+            # 2 is the label for supination and below are the metrics each data point must fulfill
+            if number == 2:
+                # only keeps data if handedness confidence score is above 97% and if the thumb tip coordinate is negative
+                if handedness.classification[0].label[0:] == "Right" and handedness.classification[0].score >= 0.97 and landmark_list[8] > 0:
+                    with open(csv_path, 'a', newline="") as f:
+                        writer = csv.writer(f)
+                        writer.writerow([number, *landmark_list])
+                        print("Logged data on frame " + str(frame_num))
+            if number == 1:
+                # only keeps data if distance between index and middle finger PIP's is above a certain amount
+                if handedness.classification[0].label[0:] == "Right" and (abs(landmark_list[12] - landmark_list[20]) >= 0.16):
+                    with open(csv_path, 'a', newline="") as f:
+                        writer = csv.writer(f)
+                        writer.writerow([number, *landmark_list])
+                        print("Logged data on frame " + str(frame_num))
         return
 
     def select_mode(key, mode):
